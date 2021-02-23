@@ -10,3 +10,6 @@
 
 # UML
 *.mdj
+
+# Spyder project files
+.spyproject
