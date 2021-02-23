@@ -1,6 +1,7 @@
 import numpy as np
 from feastruct.fea.elements.frame import FrameElement
-
+from scipy.spatial.transform import Rotation
+from scipy.linalg import block_diag
 
 class FrameElement3D(FrameElement):
     """Class for a 3D frame element.
@@ -543,34 +544,41 @@ class EulerBernoulli3D_2N(FrameElement3D):
         :returns: Element transformation matrix
         :rtype: :class:`numpy.ndarray`
         """
+        r = Rotation.from_rotvec([0, 0, np.pi/2])
+        T = r.as_matrix()
+        kT = block_diag(T,T,T,T)
+        
+        return kT
+    
+        # (_, _, _, c) = self.get_geometric_properties()
 
-        (_, _, _, c) = self.get_geometric_properties()
+        # # construct rotation matrix
+        # cxx = c[0]
+        # cyx = c[1]
+        # czx = c[2]
+        # d = np.sqrt(cxx * cxx + cyx * cyx)
+        # cxy = -cyx / d
+        # cyy = cxx / d
+        # czy = 0
+        # cxz = -cxx * czx / d
+        # cyz = -cyx * czx / d
+        # czz = d
 
-        # construct rotation matrix
-        cxx = c[0]
-        cyx = c[1]
-        czx = c[2]
-        d = np.sqrt(cxx * cxx + cyx * cyx)
-        cxy = -cyx / d
-        cyy = cxx / d
-        czy = 0
-        cxz = -cxx * czx / d
-        cyz = -cyx * czx / d
-        czz = d
+        # gamma = np.array([
+        #     [cxx, cyx, czx],
+        #     [cxy, cyy, czy],
+        #     [cxz, cyz, czz]
+        # ])
 
-        gamma = np.array([
-            [cxx, cyx, czx],
-            [cxy, cyy, czy],
-            [cxz, cyz, czz]
-        ])
+        # T = np.zeros((12, 12))
+        # T[0:3, 0:3] = gamma
+        # T[3:6, 3:6] = gamma
+        # T[6:9, 6:9] = gamma
+        # T[9:12, 9:12] = gamma
 
-        T = np.zeros((12, 12))
-        T[0:3, 0:3] = gamma
-        T[3:6, 3:6] = gamma
-        T[6:9, 6:9] = gamma
-        T[9:12, 9:12] = gamma
+        # return T
 
-        return T
+
 
     #
     # def generate_udl(self, q):
