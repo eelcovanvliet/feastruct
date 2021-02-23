@@ -1,4 +1,6 @@
-
+# I still get post error, but no singularity anymore!
+# I changed the boudnary conditions to fixed
+# The beam 3d stiffness matrix seems a bit weird, very large and near zero values. 
 # Ok, I added the EB_3d, still the same error.
 # It's probably because I switched to bar elements instead of beam
 # Which is called by u = solver_func(K_mod, f_ext) in linstatic.py
@@ -37,7 +39,7 @@ for i in range(num_nodes):
 # create beam elements
 for i in range(num_nodes - 1):
     elements.append(analysis.create_element(
-        el_type='Bar2-3D',
+        el_type='EB2-3D',
         nodes=[nodes[i], nodes[i+1]],
         material=steel,
         section=section
@@ -45,7 +47,7 @@ for i in range(num_nodes - 1):
 
 # add supports
 freedom_case = cases.FreedomCase()
-freedom_case.add_nodal_support(node=nodes[0], val=0, dof=0)
+freedom_case.add_nodal_support(node=nodes[0], val=0, dof='all')
 freedom_case.add_nodal_support(node=nodes[0], val=0, dof=1)
 freedom_case.add_nodal_support(node=nodes[-1], val=0, dof=1)
 
