@@ -1,7 +1,15 @@
+
+# Ok, I added the EB_3d, still the same error.
+# It's probably because I switched to bar elements instead of beam
+# Which is called by u = solver_func(K_mod, f_ext) in linstatic.py
+# This is due to singular matrix in Solver.direct_solver()
+# Get a post error
+
+
 from feastruct.pre.material import Steel
 from feastruct.pre.section import Section
 import feastruct.fea.cases as cases
-from feastruct.fea.frame_analysis import FrameAnalysis2D
+from feastruct.fea.frame_analysis import FrameAnalysis3D
 from feastruct.solvers.linstatic import LinearStatic
 from feastruct.solvers.feasolve import SolverSettings
 
@@ -16,7 +24,7 @@ nodes = []  # list holding the node objects
 elements = []  # list holding the element objects
 
 # create 2d frame analysis object
-analysis = FrameAnalysis2D()
+analysis = FrameAnalysis3D()
 
 # create materials and sections
 steel = Steel()
@@ -24,12 +32,12 @@ section = Section(area=3230, ixx=23.6e6)
 
 # create nodes
 for i in range(num_nodes):
-    nodes.append(analysis.create_node(coords=[length / (num_nodes - 1) * i]))
+    nodes.append(analysis.create_node(coords=[0, length / (num_nodes - 1) * i, 0]))
 
 # create beam elements
 for i in range(num_nodes - 1):
     elements.append(analysis.create_element(
-        el_type='EB2-2D',
+        el_type='Bar2-3D',
         nodes=[nodes[i], nodes[i+1]],
         material=steel,
         section=section
