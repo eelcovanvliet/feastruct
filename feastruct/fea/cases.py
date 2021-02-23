@@ -76,7 +76,7 @@ class FreedomCase(Case):
 
         super().__init__(items)
 
-    def add_nodal_support(self, node, val, dof):
+    def add_nodal_support(self, node, val, dof='all'):
         """Adds a nodal dirichlet boundary condition to the current freedom case.
 
         :param node: The node object at which the nodal support acts
@@ -91,10 +91,16 @@ class FreedomCase(Case):
 
         # TODO: check that the support does not already exist
         # raise exception if duplicate added
-
-        # add an entry to the freedom case items list
-        new_support = bcs.NodalSupport(node, val, dof)
-        self.add_item(new_support)
+                          
+        if dof == 'all':
+            dof = [0,1,2,3,4,5]
+        elif not isinstance(dof, list):
+            dof = [dof]
+        
+        # add an entry to the freedom case items list           
+        for dd in dof:
+            new_support = bcs.NodalSupport(node, val, dd)
+            self.add_item(new_support)
 
         return new_support
 
