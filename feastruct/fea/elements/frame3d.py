@@ -35,7 +35,81 @@ class FrameElement3D(FrameElement):
 
         # initialise parent FrameElement class
         super().__init__(nodes=nodes, material=material, efs=efs, section=section)
+        
+    def plot_element(self, ax, linestyle='-', linewidth=2, marker='.'):
+        """ Adapted copy of the 2D variant
+        """
 
+        coords = self.get_node_coords()
+
+        ax.plot(coords[:, 0], coords[:, 1], coords[:, 2], 'k.', linestyle=linestyle,
+                linewidth=linewidth, marker=marker, markersize=8)
+        
+    def plot_deformed_element(self, ax, analysis_case, n, def_scale, u_el=None):
+        """ Adapted dopy of the 2D variant
+        """
+
+        # if no displacement vector is supplied, get the analysis results
+        if u_el is None:
+            # get local axis displacements
+            disps = self.get_displacements(n=n, analysis_case=analysis_case)
+            xis = disps[:, 0]
+            us = disps[:, 1]
+            vs = disps[:, 2]
+
+        # if a displacement vector is supplied
+        else:
+            # set stations
+            xis = np.linspace(0, 1, n)
+
+            # rotate nodal displacements to local axis
+            T = self.get_transformation_matrix()
+            u_el[0, :] = np.matmul(T, u_el[0, :])
+            u_el[1, :] = np.matmul(T, u_el[1, :])
+
+        # redefine number of stations
+        n = len(xis)
+
+        # compute frame geometric parameters
+        (node_coords, _, _, c) = self.get_geometric_properties()
+
+        # allocate displacement vectors
+        u_x = np.zeros(n)
+        u_y = np.zeros(n)
+        x = np.zeros(n)
+        y = np.zeros(n)
+
+        # original location of frame station points
+        x0 = np.linspace(node_coords[0, 0], node_coords[1, 0], n)
+        y0 = np.linspace(node_coords[0, 1], node_coords[1, 1], n)
+
+        # loop through stations on frame
+        for (i, xi) in enumerate(xis):
+            if u_el is None:
+                u = us[i]
+                v = vs[i]
+            else:
+                (u, v, _) = self.calculate_local_displacement(xi, u_el)
+
+            # scale displacements by deformation scale
+            u *= def_scale
+            v *= def_scale
+
+            # compute cartesian displacements at point i
+            u_x[i] = u * c[0] - v * c[1]
+            u_y[i] = u * c[1] + v * c[0]
+
+            # compute location of point i
+            x[i] = u_x[i] + x0[i]
+            y[i] = u_y[i] + y0[i]
+
+        # plot frame elements
+        for i in range(n - 1):
+            ax.plot([x[i], x[i+1]], [y[i], y[i+1]], 'k-', linewidth=2)
+
+        # plot end markers
+        ax.plot(x[0], y[0], 'k.', markersize=8)
+        ax.plot(x[-1], y[-1], 'k.', markersize=8)
 
 class Bar3D_2N(FrameElement3D):
     """Two noded, three dimensional bar element that can resist an axial force only. The element

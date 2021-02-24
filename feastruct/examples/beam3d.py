@@ -1,3 +1,4 @@
+# It's becuase there is no 3d vaiant of self.post = PostProcessor2D(self)
 # I still get post error, but no singularity anymore!
 # I changed the boudnary conditions to fixed
 # The beam 3d stiffness matrix seems a bit weird, very large and near zero values. 
@@ -7,6 +8,8 @@
 # This is due to singular matrix in Solver.direct_solver()
 # Get a post error
 
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 from feastruct.pre.material import Steel
 from feastruct.pre.section import Section
@@ -48,8 +51,8 @@ for i in range(num_nodes - 1):
 # add supports
 freedom_case = cases.FreedomCase()
 freedom_case.add_nodal_support(node=nodes[0], val=0, dof='all')
-freedom_case.add_nodal_support(node=nodes[0], val=0, dof=1)
-freedom_case.add_nodal_support(node=nodes[-1], val=0, dof=1)
+# freedom_case.add_nodal_support(node=nodes[0], val=0, dof=1)
+# freedom_case.add_nodal_support(node=nodes[-1], val=0, dof=1)
 
 # add loads
 load_case = cases.LoadCase()
@@ -73,9 +76,13 @@ LinearStatic(analysis=analysis, analysis_cases=[analysis_case], solver_settings=
 # post
 # ----
 
-analysis.post.plot_geom(analysis_case=analysis_case)
-analysis.post.plot_geom(analysis_case=analysis_case, deformed=True, def_scale=25)
-analysis.post.plot_frame_forces(analysis_case=analysis_case, axial=True)
-analysis.post.plot_frame_forces(analysis_case=analysis_case, shear=True)
-analysis.post.plot_frame_forces(analysis_case=analysis_case, moment=True)
-analysis.post.plot_reactions(analysis_case=analysis_case)
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+analysis.post.plot_geom(analysis_case=analysis_case, ax=ax)
+analysis.post.plot_geom(analysis_case=analysis_case, deformed=True, def_scale=25,
+                        ax=ax)
+# analysis.post.plot_frame_forces(analysis_case=analysis_case, axial=True)
+# analysis.post.plot_frame_forces(analysis_case=analysis_case, shear=True)
+# analysis.post.plot_frame_forces(analysis_case=analysis_case, moment=True)
+# analysis.post.plot_reactions(analysis_case=analysis_case)

@@ -1,5 +1,6 @@
 from feastruct.fea.fea import FiniteElementAnalysis
 from feastruct.post.post2d import PostProcessor2D
+from feastruct.post.post3d import PostProcessor3D
 import feastruct.fea.elements.frame2d as frame2d
 import feastruct.fea.elements.frame3d as frame3d
 
@@ -126,3 +127,5 @@ class FrameAnalysis3D(FrameAnalysis):
 
         # initialise parent FrameAnalysis class
         super().__init__(nodes=nodes, elements=elements, nfa=nfa)
+        
+        self.post = PostProcessor3D(self)
